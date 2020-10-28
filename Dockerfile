@@ -2,7 +2,7 @@ FROM nfcore/base:latest
 
 LABEL \
     authors="olavur@fargen.fo" \
-    description="Align reads and call variants from Illumina short reads using GATK best practices [WIP]" \
+    description="Perform joint genotyping of GVCFs via GATK's GenotypeGVCFs." \
     maintainer="Ólavur Mortensen <olavur@fargen.fo>"
 
 RUN apt-get update -yqq && \
@@ -12,5 +12,5 @@ RUN apt-get update -yqq && \
 
 COPY environment.yml /
 RUN conda env create -f /environment.yml && conda clean -a
-ENV PATH /opt/conda/envs/fargen-ngs/bin:$PATH
-RUN nextflow pull olavurmortensen/fargen-ngs
+ENV PATH /opt/conda/envs/gatk-joint-genotyping/bin:$PATH
+RUN nextflow pull olavurmortensen/gatk-joint-genotyping

@@ -1,5 +1,5 @@
 
-name: fargen-ngs
+name: gatk-joint-genotyping
 
 channels:
   - bioconda
@@ -9,16 +9,9 @@ channels:
 
 dependencies:
   - nextflow=20.01.0
-  - bwa=0.7.17
-  - samtools=1.9
-  - bbtools=37.62
   - gatk4=4.1.0.0
   - r-gsalib=2.1
   - r-gplots=3.0.1.1
   - r-ggplot2=3.1.0
-  - hapcut2=1.2
-  - whatshap=0.18
-  - fastqc=0.11.8
-  - qualimap=2.2.2a
   - multiqc=1.9
   - snpeff=4.3.1t
