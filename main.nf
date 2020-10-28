@@ -42,7 +42,7 @@ assert params.outdir != null, 'Input parameter "outdir" cannot be unasigned.'
 
 println "L I N K S E Q -- Joint Genotyping    "
 println "================================="
-println "tsv_file          : ${params.tsv_file}"
+println "tsv_file           : ${params.tsv_file}"
 println "reference          : ${params.reference}"
 println "dbsnp              : ${params.dbsnp}"
 println "mills              : ${params.mills}"
@@ -72,8 +72,6 @@ reference = file(params.reference)
 dbsnp = file(params.dbsnp)
 mills = file(params.mills)
 kGphase1 = file(params.kGphase1)
-// NOTE: 1000 Genomes phase 3 is not used anywhere at the moment, but could be used
-// in CalculateGenotypePosteriors.
 kGphase3 = file(params.kGphase3)
 omni = file(params.omni)
 hapmap = file(params.hapmap)
@@ -310,14 +308,10 @@ process join_SNPs_INDELs {
     """
 }
 
-// TODO:
-// More info about genotype refinement: https://gatkforums.broadinstitute.org/gatk/discussion/4723/genotype-refinement-workflow
-// Consider whether to use a supporting dataset. I commented out the "-supporting" argument,
-// because it biases the data toward the population the supporting dataset is based on. If
-// only few samples are in the dataset, a supporting dataset can be quite useful.
-// Supply pedigree information (does this use more than just trios?)
-// Consider which filters, if any, to apply.
 // Calculate the genotype posteriors based on all the samples in the VCF.
+// More info about genotype refinement: https://gatkforums.broadinstitute.org/gatk/discussion/4723/genotype-refinement-workflow
+// TODO:
+// Consider supplying pedigree information (does this use more than just trios?)
 process refine_genotypes {
     input:
     set file(vcf), file(idx) from joined_snp_indel_ch
@@ -374,7 +368,6 @@ process annotate_rsid {
     """
 }
 
-// TODO: memory specification?
 // Annotate the VCF with effect prediction. Output some summary stats from the effect prediction as well.
 process annotate_effect {
     publishDir "${params.outdir}/variants", pattern: "snpEff_stats.csv", mode: 'copy', overwrite: true
