@@ -3,12 +3,6 @@
 Author: Ólavur Mortensen <olavur@fargen.fo>
 */
 
-/*
-TODO
-Make the input path smarter.
-Use SnpEff dataDir
-*/
-
 // Input parameters.
 params.tsv_file = null
 params.reference = null
