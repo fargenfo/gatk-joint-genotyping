@@ -5,7 +5,6 @@ channels:
   - bioconda
   - conda-forge
   - defaults
-  - AgBiome
 
 dependencies:
   - nextflow=20.01.0
@@ -15,3 +14,4 @@ dependencies:
   - r-ggplot2=3.1.0
   - multiqc=1.9
   - snpeff=4.3.1t
+  - tabix=0.2.6
