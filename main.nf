@@ -77,6 +77,7 @@ omni = file(params.omni)
 hapmap = file(params.hapmap)
 targets = file(params.targets)
 tsv_file = file(params.tsv_file)
+outdir = file(params.outdir)
 
 // TODO:
 // --reader-threads argument can possibly improve performance, but only works with one interval at a time:
@@ -474,7 +475,7 @@ process multiqc {
 
     script:
     """
-    multiqc -f ${params.outdir}
+    multiqc -f $outdir
     """
 }
 
