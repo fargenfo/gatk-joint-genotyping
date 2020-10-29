@@ -483,7 +483,7 @@ process multiqc {
 workflow.onComplete {
     log.info "L I N K S E Q -- Joint Genotyping    "
     log.info "================================="
-    log.info "gvcf_path          : ${params.gvcf_path}"
+    log.info "tsv_file           : ${params.tsv_file}"
     log.info "reference          : ${params.reference}"
     log.info "dbsnp              : ${params.dbsnp}"
     log.info "mills              : ${params.mills}"
