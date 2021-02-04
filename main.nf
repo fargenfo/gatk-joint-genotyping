@@ -70,16 +70,16 @@ println "================================="
 
 
 // Get file handlers for input files.
-reference = file(params.reference)
-dbsnp = file(params.dbsnp)
-mills = file(params.mills)
-kGphase1 = file(params.kGphase1)
-kGphase3 = file(params.kGphase3)
-omni = file(params.omni)
-hapmap = file(params.hapmap)
-targets = file(params.targets)
+reference = file(params.reference, checkIfExists: true)
+dbsnp = file(params.dbsnp, checkIfExists: true)
+mills = file(params.mills, checkIfExists: true)
+kGphase1 = file(params.kGphase1, checkIfExists: true)
+kGphase3 = file(params.kGphase3, checkIfExists: true)
+omni = file(params.omni, checkIfExists: true)
+hapmap = file(params.hapmap, checkIfExists: true)
+targets = file(params.targets, checkIfExists: true)
 snpeff_datadir = file(params.snpeff_datadir, checkIfExists: true)
-tsv_file = file(params.tsv_file)
+tsv_file = file(params.tsv_file, checkIfExists: true)
 outdir = file(params.outdir)
 
 // TODO:
