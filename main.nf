@@ -13,6 +13,7 @@ params.kGphase1 = null
 params.kGphase3 = null
 params.omni = null
 params.hapmap = null
+params.snpeff_datadir = null
 params.outdir = null
 params.help = false
 
@@ -38,6 +39,7 @@ assert params.kGphase3 != null, 'Input parameter "kGphase3" cannot be unasigned.
 assert params.omni != null, 'Input parameter "omni" cannot be unasigned.'
 assert params.hapmap != null, 'Input parameter "hapmap" cannot be unasigned.'
 assert params.targets != null, 'Input parameter "targets" cannot be unasigned.'
+assert params.snpeff_datadir != null, 'Input parameter "snpeff_datadir" cannot be unasigned.'
 assert params.outdir != null, 'Input parameter "outdir" cannot be unasigned.'
 
 println "L I N K S E Q -- Joint Genotyping    "
@@ -76,6 +78,7 @@ kGphase3 = file(params.kGphase3)
 omni = file(params.omni)
 hapmap = file(params.hapmap)
 targets = file(params.targets)
+snpeff_datadir = file(params.snpeff_datadir, checkIfExists: true)
 tsv_file = file(params.tsv_file)
 outdir = file(params.outdir)
 
@@ -386,6 +389,8 @@ process annotate_effect {
          -i vcf \
          -o vcf \
          -csvStats "snpEff_stats.csv" \
+         -nodownload \
+         -dataDir $snpeff_datadir \
          hg38 \
          -v \
          $vcf > "effect_annotated.vcf"
