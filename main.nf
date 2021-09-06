@@ -108,7 +108,7 @@ process consolidate_gvcf {
         -L $targets \
         --genomicsdb-workspace-path "genomicsdb" \
         --merge-input-intervals \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -129,7 +129,7 @@ process joint_genotyping {
         -V gendb://$genomicsdb \
         -R $reference \
         -O "genotyped.vcf" \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -205,7 +205,7 @@ process recalibrate_snps {
         -O "recal.table" \
         --tranches-file "tranches.table" \
         --rscript-file "snps.plots.R" \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -231,7 +231,7 @@ process apply_vqsr_snps {
         --tranches-file $tranches_table \
         --recal-file $recal_table \
         -mode SNP \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -260,7 +260,7 @@ process recalibrate_indels {
         -O "recal.table" \
         --tranches-file "tranches.table" \
         --rscript-file "plots.plots.R" \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -286,7 +286,7 @@ process apply_vqsr_indels {
         --tranches-file $tranches_table \
         --recal-file $recal_table \
         -mode INDEL \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
