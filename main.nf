@@ -243,8 +243,7 @@ process apply_vqsr_snps {
 // TODO: use --trust-all-polymorphic?
 // Generate recalibration and tranches tables for recalibrating the indel variants in the next step.
 process recalibrate_indels {
-    publishDir "${params.outdir}/vqsr_report", pattern: "indels.plots.pdf", mode: 'copy', overwrite: true
-    publishDir "${params.outdir}/vqsr_report", pattern: "tranches.table.pdf", mode: 'copy', overwrite: true, saveAs: {filename -> "indels_tranches.pdf"}
+    publishDir "${params.outdir}/vqsr_report", pattern: "indels.plots.R.pdf", mode: 'copy', overwrite: true
 
     input:
     set file(vcf), file(idx) from genotyped_indelrecal_ch
@@ -253,7 +252,6 @@ process recalibrate_indels {
     set file("recal.table"), file("recal.table.idx") into indels_recal_table_ch
     file "tranches.table" into indels_trances_table_ch
     file "indels.plots.R.pdf"
-    file "tranches.table.pdf"
 
     script:
     """
