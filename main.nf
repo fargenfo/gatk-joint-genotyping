@@ -179,15 +179,19 @@ process subset_indels {
 // Increasing --max-gaussians may work for larger sample sizes. For two samples, --max-gaussians=4 failed. exoseq uses 4.
 // Filtering with VQSR based on DP is not recommended for exome data. Don't know if I'm currently doing this.
 
-// TODO: do I want the plots from "snps.plots.R" (and "snps.plots.R.pdf")?
 // Generate recalibration and tranches tables for recalibrating the SNP variants in the next step.
 process recalibrate_snps {
+    publishDir "${params.outdir}/vqsr_report", pattern: "snps.plots.R.pdf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/vqsr_report", pattern: "tranches.table.pdf", mode: 'copy', overwrite: true, saveAs: {filename -> "snps_tranches.pdf"}
+
     input:
     set file(vcf), file(idx) from genotyped_snprecal_ch
 
     output:
     set file("recal.table"), file("recal.table.idx") into snps_recal_table_ch
     file "tranches.table" into snps_trances_table_ch
+    file "snps.plots.R.pdf"
+    file "tranches.table.pdf"
 
     script:
     """
@@ -239,12 +243,17 @@ process apply_vqsr_snps {
 // TODO: use --trust-all-polymorphic?
 // Generate recalibration and tranches tables for recalibrating the indel variants in the next step.
 process recalibrate_indels {
+    publishDir "${params.outdir}/vqsr_report", pattern: "indels.plots.pdf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/vqsr_report", pattern: "tranches.table.pdf", mode: 'copy', overwrite: true, saveAs: {filename -> "indels_tranches.pdf"}
+
     input:
     set file(vcf), file(idx) from genotyped_indelrecal_ch
 
     output:
     set file("recal.table"), file("recal.table.idx") into indels_recal_table_ch
     file "tranches.table" into indels_trances_table_ch
+    file "indels.plots.R.pdf"
+    file "tranches.table.pdf"
 
     script:
     """
@@ -259,7 +268,7 @@ process recalibrate_indels {
         --max-gaussians 4 \
         -O "recal.table" \
         --tranches-file "tranches.table" \
-        --rscript-file "plots.plots.R" \
+        --rscript-file "indels.plots.R" \
         --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
