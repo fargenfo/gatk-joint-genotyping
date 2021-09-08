@@ -205,7 +205,7 @@ process recalibrate_snps {
         -resource:dbsnp,known=true,training=false,truth=false,prior=7.0 $dbsnp \
         -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode SNP \
-        --max-gaussians 4 \
+        --max-gaussians 6 \
         -L $targets \
         --trust-all-polymorphic \
         --target-titv 3.2 \
