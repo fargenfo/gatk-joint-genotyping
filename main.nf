@@ -200,9 +200,9 @@ process recalibrate_snps {
         -R $reference \
         -V $vcf \
         -resource:hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap \
-        -resource:omni,known=false,training=true,truth=false,prior=12.0 $omni \
+        -resource:omni,known=false,training=true,truth=true,prior=12.0 $omni \
         -resource:1000G,known=false,training=true,truth=false,prior=10.0 $kGphase1 \
-        -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnp \
+        -resource:dbsnp,known=true,training=false,truth=false,prior=7.0 $dbsnp \
         -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode SNP \
         --max-gaussians 4 \
