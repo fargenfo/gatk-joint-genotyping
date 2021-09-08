@@ -206,6 +206,9 @@ process recalibrate_snps {
         -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode SNP \
         --max-gaussians 4 \
+        -L $targets \
+        --trust-all-polymorphic \
+        --target-titv 3.2 \
         -O "recal.table" \
         --tranches-file "tranches.table" \
         --rscript-file "snps.plots.R" \
@@ -264,6 +267,9 @@ process recalibrate_indels {
         -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode INDEL \
         --max-gaussians 4 \
+        -L $targets \
+        --trust-all-polymorphic \
+        --target-titv 3.2 \
         -O "recal.table" \
         --tranches-file "tranches.table" \
         --rscript-file "indels.plots.R" \
