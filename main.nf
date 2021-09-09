@@ -138,6 +138,29 @@ process joint_genotyping {
 The next few processes do variant recalibration. SNPs and indels are recalibrated separately.
 */
 
+// NOTE: The tutorial in the link below suggests to filter based on ExcessHet before recalibration. This is essentially a HWE test.
+// This expects a high number of unrelated samples.
+// https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants-either-with-VQSR-or-by-hard-filtering
+//process filter_excesshet {
+//    input:
+//    set file(vcf), file(idx) from genotyped_filter_ch
+//
+//    output:
+//    set file("excessHet.vcf"), file("excessHet.vcf.idx") into genotyped_subsetsnps_ch, genotyped_subsetindels_ch
+//
+//    script:
+//    """
+//    mkdir tmp
+//    gatk VariantFiltration \
+//        -V $vcf \
+//        --filter-expression "ExcessHet > 50.0" \
+//        --filter-name ExcessHet \
+//        -O "excessHet.vcf" \
+//        --tmp-dir tmp \
+//        --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
+//    """
+//}
+
 // Splitting VCF into SNPs and indels, because they have to be filtered seperately
 process subset_snps {
 
