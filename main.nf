@@ -264,7 +264,7 @@ process recalibrate_indels {
         -V $vcf \
         -resource:mills,known=false,training=true,truth=true,prior=12.0 $mills \
         -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnp \
-        -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
+        -an QD -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode INDEL \
         --max-gaussians 4 \
         -L $targets \
