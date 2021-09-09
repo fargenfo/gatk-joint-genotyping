@@ -38,6 +38,7 @@ assert params.kGphase1 != null, 'Input parameter "kGphase1" cannot be unasigned.
 assert params.kGphase3 != null, 'Input parameter "kGphase3" cannot be unasigned.'
 assert params.omni != null, 'Input parameter "omni" cannot be unasigned.'
 assert params.hapmap != null, 'Input parameter "hapmap" cannot be unasigned.'
+assert params.axiomPoly != null, 'Input parameter "axiomPoly" cannot be unasigned.'
 assert params.targets != null, 'Input parameter "targets" cannot be unasigned.'
 assert params.snpeff_datadir != null, 'Input parameter "snpeff_datadir" cannot be unasigned.'
 assert params.outdir != null, 'Input parameter "outdir" cannot be unasigned.'
@@ -52,6 +53,7 @@ println "kGphase1           : ${params.kGphase1}"
 println "kGphase3           : ${params.kGphase3}"
 println "omni               : ${params.omni}"
 println "hapmap             : ${params.hapmap}"
+println "axiomPoly          : ${params.axiomPoly}"
 println "targets            : ${params.targets}"
 println "outdir             : ${params.outdir}"
 println "================================="
@@ -77,6 +79,7 @@ kGphase1 = file(params.kGphase1, checkIfExists: true)
 kGphase3 = file(params.kGphase3, checkIfExists: true)
 omni = file(params.omni, checkIfExists: true)
 hapmap = file(params.hapmap, checkIfExists: true)
+axiomPoly = file(params.axiomPoly, checkIfExists: true)
 targets = file(params.targets, checkIfExists: true)
 snpeff_datadir = file(params.snpeff_datadir, checkIfExists: true)
 tsv_file = file(params.tsv_file, checkIfExists: true)
@@ -287,6 +290,7 @@ process recalibrate_indels {
         -V $vcf \
         -resource:mills,known=false,training=true,truth=true,prior=12.0 $mills \
         -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnp \
+        -resource:axiomPoly,known=false,training=true,truth=false,prior=10 $axiomPoly \
         -an QD -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode INDEL \
         --max-gaussians 4 \
