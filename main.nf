@@ -132,6 +132,7 @@ process joint_genotyping {
         -V gendb://$genomicsdb \
         -R $reference \
         -O "genotyped.vcf" \
+        -stand-call-conf 60.0 \
         --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
@@ -477,12 +478,10 @@ process variant_evaluation {
     publishDir "${params.outdir}/variants", mode: 'copy', overwrite: true
 
     input:
-    //file vcf from rsid_annotated_vcf_ch
     set file(vcf), file(idx) from variants_evaluate_ch
 
     output:
     file "variant_eval.table" into variant_eval_table_ch
-    val "done" into status_ch
 
     script:
     """
@@ -512,7 +511,7 @@ process multiqc {
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
 
     input:
-    val status from status_ch
+    file table from variant_eval_table_ch
 
     output:
     file "multiqc_report.html" into multiqc_report_ch
