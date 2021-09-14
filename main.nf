@@ -14,6 +14,7 @@ params.kGphase3 = null
 params.omni = null
 params.hapmap = null
 params.snpeff_datadir = null
+params.call_conf = null
 params.outdir = null
 params.help = false
 
@@ -41,6 +42,7 @@ assert params.hapmap != null, 'Input parameter "hapmap" cannot be unasigned.'
 assert params.axiomPoly != null, 'Input parameter "axiomPoly" cannot be unasigned.'
 assert params.targets != null, 'Input parameter "targets" cannot be unasigned.'
 assert params.snpeff_datadir != null, 'Input parameter "snpeff_datadir" cannot be unasigned.'
+assert params.call_conf != null, 'Input parameter "call_conf" cannot be unasigned.'
 assert params.outdir != null, 'Input parameter "outdir" cannot be unasigned.'
 
 println "L I N K S E Q -- Joint Genotyping    "
@@ -55,6 +57,8 @@ println "omni               : ${params.omni}"
 println "hapmap             : ${params.hapmap}"
 println "axiomPoly          : ${params.axiomPoly}"
 println "targets            : ${params.targets}"
+println "snpeff_datadir     : ${params.snpeff_datadir}"
+println "call_conf          : ${params.call_conf}"
 println "outdir             : ${params.outdir}"
 println "================================="
 println "Command line        : ${workflow.commandLine}"
@@ -84,6 +88,8 @@ targets = file(params.targets, checkIfExists: true)
 snpeff_datadir = file(params.snpeff_datadir, checkIfExists: true)
 tsv_file = file(params.tsv_file, checkIfExists: true)
 outdir = file(params.outdir)
+
+call_conf = params.call_conf
 
 // TODO:
 // --reader-threads argument can possibly improve performance, but only works with one interval at a time:
@@ -132,7 +138,7 @@ process joint_genotyping {
         -V gendb://$genomicsdb \
         -R $reference \
         -O "genotyped.vcf" \
-        -stand-call-conf 60.0 \
+        -stand-call-conf $call_conf \
         --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
