@@ -267,7 +267,7 @@ process apply_vqsr_snps {
         -R $reference \
         -V $vcf \
         -O "snps_recal.vcf" \
-        --truth-sensitivity-filter-level 99.0 \
+        --truth-sensitivity-filter-level 90.0 \
         --tranches-file $tranches_table \
         --recal-file $recal_table \
         -mode SNP \
@@ -329,7 +329,7 @@ process apply_vqsr_indels {
         -R $reference \
         -V $vcf \
         -O "indels_recal.vcf" \
-        --truth-sensitivity-filter-level 99.0 \
+        --truth-sensitivity-filter-level 90.0 \
         --tranches-file $tranches_table \
         --recal-file $recal_table \
         -mode INDEL \
