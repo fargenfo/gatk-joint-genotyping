@@ -7,11 +7,11 @@ channels:
   - defaults
 
 dependencies:
-  - nextflow=20.01.0
-  - gatk4=4.1.0.0
+  - nextflow=20.01
+  - gatk4=4.1
   - r-gsalib=2.1
-  - r-gplots=3.0.1.1
-  - r-ggplot2=3.1.0
+  - r-gplots=3.0
+  - r-ggplot2=3.1
   - multiqc=1.9
-  - snpeff=4.3.1t
-  - tabix=0.2.6
+  - snpeff=4.3
+  - tabix=0.2

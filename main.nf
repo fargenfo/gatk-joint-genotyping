@@ -14,6 +14,7 @@ params.kGphase3 = null
 params.omni = null
 params.hapmap = null
 params.snpeff_datadir = null
+params.call_conf = null
 params.outdir = null
 params.help = false
 
@@ -38,8 +39,10 @@ assert params.kGphase1 != null, 'Input parameter "kGphase1" cannot be unasigned.
 assert params.kGphase3 != null, 'Input parameter "kGphase3" cannot be unasigned.'
 assert params.omni != null, 'Input parameter "omni" cannot be unasigned.'
 assert params.hapmap != null, 'Input parameter "hapmap" cannot be unasigned.'
+assert params.axiomPoly != null, 'Input parameter "axiomPoly" cannot be unasigned.'
 assert params.targets != null, 'Input parameter "targets" cannot be unasigned.'
 assert params.snpeff_datadir != null, 'Input parameter "snpeff_datadir" cannot be unasigned.'
+assert params.call_conf != null, 'Input parameter "call_conf" cannot be unasigned.'
 assert params.outdir != null, 'Input parameter "outdir" cannot be unasigned.'
 
 println "L I N K S E Q -- Joint Genotyping    "
@@ -52,7 +55,10 @@ println "kGphase1           : ${params.kGphase1}"
 println "kGphase3           : ${params.kGphase3}"
 println "omni               : ${params.omni}"
 println "hapmap             : ${params.hapmap}"
+println "axiomPoly          : ${params.axiomPoly}"
 println "targets            : ${params.targets}"
+println "snpeff_datadir     : ${params.snpeff_datadir}"
+println "call_conf          : ${params.call_conf}"
 println "outdir             : ${params.outdir}"
 println "================================="
 println "Command line        : ${workflow.commandLine}"
@@ -77,10 +83,13 @@ kGphase1 = file(params.kGphase1, checkIfExists: true)
 kGphase3 = file(params.kGphase3, checkIfExists: true)
 omni = file(params.omni, checkIfExists: true)
 hapmap = file(params.hapmap, checkIfExists: true)
+axiomPoly = file(params.axiomPoly, checkIfExists: true)
 targets = file(params.targets, checkIfExists: true)
 snpeff_datadir = file(params.snpeff_datadir, checkIfExists: true)
 tsv_file = file(params.tsv_file, checkIfExists: true)
 outdir = file(params.outdir)
+
+call_conf = params.call_conf
 
 // TODO:
 // --reader-threads argument can possibly improve performance, but only works with one interval at a time:
@@ -108,7 +117,7 @@ process consolidate_gvcf {
         -L $targets \
         --genomicsdb-workspace-path "genomicsdb" \
         --merge-input-intervals \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -119,7 +128,7 @@ process joint_genotyping {
     file genomicsdb from genomicsdb_ch
 
     output:
-    set file("genotyped.vcf"), file("genotyped.vcf.idx") into genotyped_subsetsnps_ch, genotyped_subsetindels_ch
+    set file("genotyped.vcf"), file("genotyped.vcf.idx") into genotyped_filter_ch
 
     script:
     """
@@ -129,7 +138,7 @@ process joint_genotyping {
         -V gendb://$genomicsdb \
         -R $reference \
         -O "genotyped.vcf" \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -138,39 +147,43 @@ process joint_genotyping {
 The next few processes do variant recalibration. SNPs and indels are recalibrated separately.
 */
 
+// NOTE: The tutorial in the link below suggests to filter based on ExcessHet before recalibration. This is essentially a HWE test.
+// This expects a high number of unrelated samples.
+// https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants-either-with-VQSR-or-by-hard-filtering
+//process filter_excesshet {
+//    input:
+//    set file(vcf), file(idx) from genotyped_filter_ch
+//
+//    output:
+//    set file("excessHet.vcf"), file("excessHet.vcf.idx") into genotyped_subsetsnps_ch, genotyped_subsetindels_ch
+//
+//    script:
+//    """
+//    mkdir tmp
+//    gatk VariantFiltration \
+//        -V $vcf \
+//        --filter-expression "ExcessHet > 50.0" \
+//        --filter-name ExcessHet \
+//        -O "excessHet.vcf" \
+//        --tmp-dir tmp \
+//        --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
+//    """
+//}
+
 // Splitting VCF into SNPs and indels, because they have to be filtered seperately
-process subset_snps {
-
+process filter_qual {
     input:
-    set file(vcf), file(idx) from genotyped_subsetsnps_ch
+    set file(vcf), file(idx) from genotyped_filter_ch
 
     output:
-    set file("snp.vcf"), file("snp.vcf.idx") into genotyped_snprecal_ch, genotyped_snpapplyrecal_ch
+    set file("filtered_qual.vcf"), file("filtered_qual.vcf.idx") into genotyped_snprecal_ch, genotyped_snpapplyrecal_ch, genotyped_indelrecal_ch, genotyped_indelapplyrecal_ch
 
     script:
     """
     gatk SelectVariants \
         -V $vcf \
-        -select-type SNP \
-        -O "snp.vcf" \
-        --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
-    """
-}
-
-process subset_indels {
-
-    input:
-    set file(vcf), file(idx) from genotyped_subsetindels_ch
-
-    output:
-    set file("indel.vcf"), file("indel.vcf.idx") into genotyped_indelrecal_ch, genotyped_indelapplyrecal_ch
-
-    script:
-    """
-    gatk SelectVariants \
-        -V $vcf \
-        -select-type INDEL \
-        -O "indel.vcf" \
+        -O "filtered_qual.vcf" \
+        -select "QUAL > $call_conf" \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -179,15 +192,19 @@ process subset_indels {
 // Increasing --max-gaussians may work for larger sample sizes. For two samples, --max-gaussians=4 failed. exoseq uses 4.
 // Filtering with VQSR based on DP is not recommended for exome data. Don't know if I'm currently doing this.
 
-// TODO: do I want the plots from "snps.plots.R" (and "snps.plots.R.pdf")?
 // Generate recalibration and tranches tables for recalibrating the SNP variants in the next step.
 process recalibrate_snps {
+    publishDir "${params.outdir}/vqsr_report", pattern: "snps.plots.R.pdf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/vqsr_report", pattern: "tranches.table.pdf", mode: 'copy', overwrite: true, saveAs: {filename -> "snps_tranches.pdf"}
+
     input:
     set file(vcf), file(idx) from genotyped_snprecal_ch
 
     output:
     set file("recal.table"), file("recal.table.idx") into snps_recal_table_ch
     file "tranches.table" into snps_trances_table_ch
+    file "snps.plots.R.pdf"
+    file "tranches.table.pdf"
 
     script:
     """
@@ -196,16 +213,19 @@ process recalibrate_snps {
         -R $reference \
         -V $vcf \
         -resource:hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap \
-        -resource:omni,known=false,training=true,truth=false,prior=12.0 $omni \
+        -resource:omni,known=false,training=true,truth=true,prior=12.0 $omni \
         -resource:1000G,known=false,training=true,truth=false,prior=10.0 $kGphase1 \
-        -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnp \
+        -resource:dbsnp,known=true,training=false,truth=false,prior=7.0 $dbsnp \
         -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode SNP \
-        --max-gaussians 4 \
+        --max-gaussians 6 \
+        -L $targets \
+        --trust-all-polymorphic \
+        --target-titv 3.2 \
         -O "recal.table" \
         --tranches-file "tranches.table" \
         --rscript-file "snps.plots.R" \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -227,11 +247,11 @@ process apply_vqsr_snps {
         -R $reference \
         -V $vcf \
         -O "snps_recal.vcf" \
-        --truth-sensitivity-filter-level 99.0 \
+        --truth-sensitivity-filter-level 90.0 \
         --tranches-file $tranches_table \
         --recal-file $recal_table \
         -mode SNP \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -239,12 +259,15 @@ process apply_vqsr_snps {
 // TODO: use --trust-all-polymorphic?
 // Generate recalibration and tranches tables for recalibrating the indel variants in the next step.
 process recalibrate_indels {
+    publishDir "${params.outdir}/vqsr_report", pattern: "indels.plots.R.pdf", mode: 'copy', overwrite: true
+
     input:
     set file(vcf), file(idx) from genotyped_indelrecal_ch
 
     output:
     set file("recal.table"), file("recal.table.idx") into indels_recal_table_ch
     file "tranches.table" into indels_trances_table_ch
+    file "indels.plots.R.pdf"
 
     script:
     """
@@ -254,13 +277,17 @@ process recalibrate_indels {
         -V $vcf \
         -resource:mills,known=false,training=true,truth=true,prior=12.0 $mills \
         -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnp \
-        -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
+        -resource:axiomPoly,known=false,training=true,truth=false,prior=10 $axiomPoly \
+        -an QD -an MQRankSum -an ReadPosRankSum -an FS -an SOR \
         -mode INDEL \
         --max-gaussians 4 \
+        -L $targets \
+        --trust-all-polymorphic \
+        --target-titv 3.2 \
         -O "recal.table" \
         --tranches-file "tranches.table" \
-        --rscript-file "plots.plots.R" \
-        --tmp-dir=tmp \
+        --rscript-file "indels.plots.R" \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -282,11 +309,11 @@ process apply_vqsr_indels {
         -R $reference \
         -V $vcf \
         -O "indels_recal.vcf" \
-        --truth-sensitivity-filter-level 99.0 \
+        --truth-sensitivity-filter-level 90.0 \
         --tranches-file $tranches_table \
         --recal-file $recal_table \
         -mode INDEL \
-        --tmp-dir=tmp \
+        --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
@@ -437,12 +464,10 @@ process variant_evaluation {
     publishDir "${params.outdir}/variants", mode: 'copy', overwrite: true
 
     input:
-    //file vcf from rsid_annotated_vcf_ch
     set file(vcf), file(idx) from variants_evaluate_ch
 
     output:
     file "variant_eval.table" into variant_eval_table_ch
-    val "done" into status_ch
 
     script:
     """
@@ -472,7 +497,7 @@ process multiqc {
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
 
     input:
-    val status from status_ch
+    file table from variant_eval_table_ch
 
     output:
     file "multiqc_report.html" into multiqc_report_ch
