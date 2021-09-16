@@ -128,7 +128,7 @@ process joint_genotyping {
     file genomicsdb from genomicsdb_ch
 
     output:
-    set file("genotyped.vcf"), file("genotyped.vcf.idx") into genotyped_subsetsnps_ch, genotyped_subsetindels_ch
+    set file("genotyped.vcf"), file("genotyped.vcf.idx") into genotyped_filter_ch
 
     script:
     """
@@ -138,7 +138,6 @@ process joint_genotyping {
         -V gendb://$genomicsdb \
         -R $reference \
         -O "genotyped.vcf" \
-        -stand-call-conf $call_conf \
         --tmp-dir tmp \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
@@ -172,38 +171,19 @@ The next few processes do variant recalibration. SNPs and indels are recalibrate
 //}
 
 // Splitting VCF into SNPs and indels, because they have to be filtered seperately
-process subset_snps {
-
+process filter_qual {
     input:
-    set file(vcf), file(idx) from genotyped_subsetsnps_ch
+    set file(vcf), file(idx) from genotyped_filter_ch
 
     output:
-    set file("snp.vcf"), file("snp.vcf.idx") into genotyped_snprecal_ch, genotyped_snpapplyrecal_ch
+    set file("filtered_qual.vcf"), file("filtered_qual.vcf.idx") into genotyped_snprecal_ch, genotyped_snpapplyrecal_ch, genotyped_indelrecal_ch, genotyped_indelapplyrecal_ch
 
     script:
     """
     gatk SelectVariants \
         -V $vcf \
-        -select-type SNP \
-        -O "snp.vcf" \
-        --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
-    """
-}
-
-process subset_indels {
-
-    input:
-    set file(vcf), file(idx) from genotyped_subsetindels_ch
-
-    output:
-    set file("indel.vcf"), file("indel.vcf.idx") into genotyped_indelrecal_ch, genotyped_indelapplyrecal_ch
-
-    script:
-    """
-    gatk SelectVariants \
-        -V $vcf \
-        -select-type INDEL \
-        -O "indel.vcf" \
+        -O "filtered_qual.vcf" \
+        -select "QUAL > $call_conf" \
         --java-options "-Xmx${task.memory.toGiga()}g -Xms${task.memory.toGiga()}g"
     """
 }
