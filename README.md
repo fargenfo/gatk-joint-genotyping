@@ -1,8 +1,8 @@
 # Joint genotyping with GATK Best Practices
 
-[![Docker build](https://img.shields.io/badge/Docker%20build-Available-informational)](https://hub.docker.com/repository/docker/olavurmortensen/gatk-joint-genotyping)
+[![Docker build](https://img.shields.io/badge/Docker%20build-Available-informational)](https://hub.docker.com/repository/docker/fargen/gatk-joint-genotyping)
 
-This pipeline is designed to perform joint genotyping (multi-sample variant calling) of GVCFs produced by the [LinkSeq pipeline](https://github.com/olavurmortensen/linkseq). This pipeline, as LinkSeq, is written in [Nextflow](nextflow.io/).
+This pipeline is designed to perform joint genotyping (multi-sample variant calling) of GVCFs produced by the [LinkSeq pipeline](https://github.com/fargenfo/linkseq). This pipeline, as LinkSeq, is written in [Nextflow](nextflow.io/).
 
 The main steps in the pipeline are the following:
 
@@ -31,7 +31,7 @@ conda activate gatk-joint-genotyping
 Pull this project with `nextflow`:
 
 ```
-nextflow pull https://github.com/olavurmortensen/gatk-joint-genotyping
+nextflow pull https://github.com/fargenfo/gatk-joint-genotyping
 ```
 
 ## Usage
@@ -84,7 +84,7 @@ sample3    /path/to/sample3.g.vcf
 Run the pipeline with this command:
 
 ```bash
-nextflow run olavurmortensen/gatk-joint-genotyping -resume -with-trace
+nextflow run fargenfo/gatk-joint-genotyping -resume -with-trace
 ```
 
 The output of the pipeline is as follows (summarized by the `tree -L 2 outs/` command):
@@ -104,5 +104,5 @@ outs/
 
 ## Resources
 
-Information about how to obtain the reference data can be found in the LinkSeq documentation: https://github.com/olavurmortensen/linkseq#reference-resources
+Information about how to obtain the reference data can be found in the LinkSeq documentation: https://github.com/fargenfo/linkseq#reference-resources
 
