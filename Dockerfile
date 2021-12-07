@@ -15,4 +15,4 @@ RUN conda config --set channel_priority strict && \
     conda env create -f /environment.yml && \
     conda clean -a
 ENV PATH /opt/conda/envs/gatk-joint-genotyping/bin:$PATH
-RUN nextflow pull olavurmortensen/gatk-joint-genotyping
+RUN nextflow pull fargenfo/gatk-joint-genotyping
