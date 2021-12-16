@@ -11,8 +11,7 @@ RUN apt-get update -yqq && \
     ttf-dejavu
 
 COPY environment.yml /
-RUN conda config --set channel_priority strict && \
-    conda env create -f /environment.yml && \
+RUN conda env create -f /environment.yml && \
     conda clean -a
 ENV PATH /opt/conda/envs/gatk-joint-genotyping/bin:$PATH
 RUN nextflow pull fargenfo/gatk-joint-genotyping
